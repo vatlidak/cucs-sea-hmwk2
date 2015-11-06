@@ -1,0 +1,32 @@
+For this assignment, you will implement something that looks a lot
+like a print spooler.  You will run these commands on a virtual
+machine; see the <a href="vmware.pd">instructions</a>.
+
+The print spooler itself will run as some other userid.  You must
+test it as one or more other users.
+
+Briefly, you must implement three commands, "addqueue", "showqueue",
+and "rmqueue".  All are privileged.  "addqueue' takes a set of file
+names as arguments, and copies the contents of those files to some
+protected directory.  "showqueue" lists the queued files: some
+arbitrary name (*not* the original file name, but a number is fine),
+the owner (the userid who made the request), the time and date it
+was added, and some sort of unique identifier.  This unique identifier
+may or may not be the same as the file name; that's entirely up to
+you.  "rmqueue" takes a list of unique identifiers and deletes those
+entries from the queue.  Only the user who added a file to the queue
+may delete it.
+
+You do not need to worry about race conditions for generating file
+names or unique identifiers.  That is, there is no need to lock any
+resource for the counter.
+
+You may use setuid or message-passing.  If you use the latter, it's
+perfectly ok to start some daemons manually.
+
+You must use at least three userids: one for the protected resource,
+and at least two test userids.  That latter is needed to test if
+one user can delete the other's files.
+
+There must not be any way to look at or change the spool directory
+or its contents except through these commands.
