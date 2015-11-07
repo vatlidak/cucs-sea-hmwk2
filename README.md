@@ -14,8 +14,12 @@ COMS W4187 Fall 2015, Columbia University
 * scripts/checkpatch.pl: Format checking script
 * tests/test.txt: A demo set of test commands
 
-## Notes - Conventions
-XXX
+## Installation
+* The installation needs root priviledges to:
+  - Create a user "print_spoller"
+  - Create a directory "/var/print_spooler"
+  - Change owner and enable setuid bit to command executables
+
 
 ## Error Handling
 XXX
