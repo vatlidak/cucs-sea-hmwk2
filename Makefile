@@ -35,6 +35,7 @@ install:
 	@id -u $(PRINT_SPOOLER_UNAME) 2>/dev/null 1>/dev/null ||\
 		sudo useradd print_spooler &&\
 	[ -d $(PRINT_SPOOLER_PATH) ] || (sudo mkdir $(PRINT_SPOOLER_PATH) &&\
+		sudo chmod 0700 $(PRINT_SPOOLER_PATH) &&\
 		sudo chown $(PRINT_SPOOLER_UNAME) $(PRINT_SPOOLER_PATH)) &&\
 	sudo chown $(PRINT_SPOOLER_UNAME) $(BIN)/addqueue &&\
 	sudo chown $(PRINT_SPOOLER_UNAME) $(BIN)/rmqueue &&\

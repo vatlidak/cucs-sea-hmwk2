@@ -20,6 +20,13 @@ COMS W4187 Fall 2015, Columbia University
   - Create a directory "/var/print_spooler"
   - Change owner and enable setuid bit to command executables
 
+ * TODO: check copy works properly
+ * TODO: check how copying files and permission of source work because
+ * 		caller will have another uid of his file when permissions
+ * 		are escalated.
+ * TODO: Assign ids and stuff..
+
+
 
 ## Error Handling
 XXX
