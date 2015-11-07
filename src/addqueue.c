@@ -16,7 +16,7 @@
 #include <errno.h>
 
 
-#define SPOOLER_PATH "/var/print_spooler"
+#define PRINT_SPOOLER_PATH "/var/print_spooler"
 #define SPOOLER_PERM 0700
 
 
@@ -35,7 +35,7 @@ static int initqueue(void)
 	}
 	else if (rval == -1 && errno == ENOENT) {
 		fprintf(stdout, "Creating print spooler directory: \"%s\"\n", SPOOLER_PATH);
-		rval = mkdir(SPOOLER_PATH, SPOOLER_PERM);
+		rval = mkdir(PRINT_SPOOLER_PATH, SPOOLER_PERM);
 		if (rval){
 			perror("mkdir");
 			return  -1;
