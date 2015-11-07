@@ -11,14 +11,17 @@ EXECUTABLES := $(BIN)/$(OBJECTS:.o=)
 build: addqueue rmqueue showqueue
 
 addqueue: $(OBJECTS)
+	@[ -d $(BIN) ] || mkdir $(BIN)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(BIN)/addqueue addqueue.o
 	@rm addqueue.o
 
 rmqueue: $(OBJECTS)
+	@[ -d $(BIN) ] || mkdir $(BIN)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(BIN)/rmqueue rmqueue.o
 	@rm rmqueue.o
 
 showqueue: $(OBJECTS)
+	@[ -d $(BIN) ] || mkdir $(BIN)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(BIN)/showqueue showqueue.o
 	@rm showqueue.o
 
@@ -50,5 +53,5 @@ checkpatch:
 	scripts/checkpatch.pl --no-tree -f src/*
 
 clean:
-	rm -f $(BIN)/*
+	rm -rf $(BIN)
 	rm -f $(OBJECTS)
