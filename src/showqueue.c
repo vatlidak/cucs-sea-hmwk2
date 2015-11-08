@@ -42,7 +42,7 @@ static inline int is_not_installed(void)
 
 /*
  * showqueue - implements showqueue command
- * @filename: the file name to be added in the queue
+ * @dirame: print spooler directory
  *
  * This functions is invoked with escallated priviedges!
  */

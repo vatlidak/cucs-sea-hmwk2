@@ -1,7 +1,7 @@
 /*
- * Filename: src/showqueue.c
+ * Filename: src/rmqueue.c
  *
- * Description: Implement showqueue command
+ * Description: Implement rmqueue command
  *
  * Copyright (C) 2015 V. Atlidakis
  *
@@ -13,10 +13,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <libgen.h>
 #include <errno.h>
-#include <dirent.h>
+#include <fcntl.h>
 #include <limits.h>
-#include <time.h>
 
 #define PRINT_SPOOLER_PATH "/var/print_spooler"
 
@@ -41,63 +41,30 @@ static inline int is_not_installed(void)
 }
 
 /*
- * showqueue - implements showqueue command
- * @filename: the file name to be added in the queue
+ * addqueue - implements addqueue command
+ * @filename: the file name to be deleted from the queue
  *
  * This functions is invoked with escallated priviedges!
  */
-int showqueue(char *dirname)
+int rmqueue(char *filename)
 {
-	int i;
 	int rval;
-	char path[PATH_MAX];
+	char *bname;
+	char dst[PATH_MAX];
 
-	DIR *pdir;
-	struct stat sbuf;
-	struct dirent *pdirent;
+	return 0;
 
-	time_t  mtime;
-	struct tm lt;
-	char strdate[16];
-	char strtime[16];
-
-
-	pdir = opendir(dirname);
-	if (!pdir) {
-		perror("opendir");
+	bname = basename(filename);
+	rval = snprintf(dst, PATH_MAX, "%s/%s_%d",
+			PRINT_SPOOLER_PATH, bname, ruid);
+	if (rval <= 0) {
+		perror("snprintf");
 		goto error;
 	}
-	i = 0;
-	printf("print spooler queue:\n");
-	printf("-------------------------------------------------------------------\n");
-	printf("nfile\t\ttime added\t\tdate added\t\tuid\n");
-	printf("-------------------------------------------------------------------\n");
-	while ((pdirent = readdir(pdir)) != NULL) {
-		if (!strcmp(pdirent->d_name, ".") ||
-		    !strcmp(pdirent->d_name, ".."))
-			continue;
-		snprintf(path, PATH_MAX, "%s/%s", dirname, pdirent->d_name);
-		rval = stat(path, &sbuf);
-		if (rval) {
-			perror("stat");
-			goto error;
-		}
-		localtime_r(&mtime, &lt);
-		memset(strtime, 0, sizeof(strtime));
-		strftime(strtime, sizeof(strtime), "%H:%M:%S", &lt);
-		memset(strdate, 0, sizeof(strdate));
-		strftime(strdate, sizeof(strdate), "%F", &lt);
-		printf("%d\t\t%s\t\t%s\t\t%s\n",
-		       (int) sbuf.st_ino, strtime, strdate, pdirent->d_name);
-		++i;
-	}
-	if (!i)
-		goto error;
+	printf("file \"%s\" copied to \"%s\"\n", filename, dst);
 
-	printf("-------------------------------------------------------------------\n");
 	return 0;
 error:
-	printf("-------------------------------------------------------------------\n");
 	return -1;
 }
 
@@ -107,8 +74,9 @@ error:
 int main(int argc, char **argv)
 {
 	int rval;
+	int i = 0;
 
-	if (argc != 1)
+	if (argc < 2)
 		goto usage;
 
 	if (is_not_installed())
@@ -122,26 +90,31 @@ int main(int argc, char **argv)
 		goto error;
 	}
 
-	rval = setuid(euid);
-	if (rval) {
-		fprintf(stderr, "Failed to escallate to effective uid: %d\n",
-			euid);
-		goto error;
-	}
-	if (showqueue(PRINT_SPOOLER_PATH)) {
-		fprintf(stderr, "Failed to show print spooler queue\n");
-		goto error;
+	while (++i < argc) {
+		rval = setuid(euid);
+		if (rval) {
+			fprintf(stderr,
+				"Failed to escallate to effective uid: %d\n",
+				euid);
+			goto error;
+		}
+		if (rmqueue(argv[i]))
+			fprintf(stderr,
+				"Failed to rm \"%s\" from the queue\n",
+				argv[i]);
+		rval = setuid(ruid);
+		if (rval) {
+			fprintf(stderr, "Failed to reset to real uid: %d\n",
+				ruid);
+			goto error;
+		}
 	}
 
-	rval = setuid(ruid);
-	if (rval) {
-		fprintf(stderr, "Failed to reset to real uid: %d\n",
-			ruid);
-		goto error;
-	}
 	return 0;
 usage:
-	fprintf(stderr, "Usage: %s\n", *argv);
+	fprintf(stderr,
+		"Usage: %s <filename1> [<filename2> ... <filenameN>]\n",
+		*argv);
 error:
 	return -1;
 }
