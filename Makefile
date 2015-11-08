@@ -6,6 +6,7 @@ BIN := bin
 OBJECTS := addqueue.o rmqueue.o showqueue.o
 EXECUTABLES := $(BIN)/$(OBJECTS:.o=)
 
+ROOT_UNAME := "root"
 PRINT_SPOOLER_PATH := "/var/print_spooler"
 PRINT_SPOOLER_UNAME := "print_spooler"
 
@@ -32,27 +33,28 @@ showqueue: $(OBJECTS)
 	@$(CC) $(CFLAGS) -c $^
 
 install:
-	@id -u $(PRINT_SPOOLER_UNAME) 2>/dev/null 1>/dev/null ||\
-		sudo useradd print_spooler &&\
-	[ -d $(PRINT_SPOOLER_PATH) ] || (sudo mkdir $(PRINT_SPOOLER_PATH) &&\
-		sudo chmod 0700 $(PRINT_SPOOLER_PATH) &&\
-		sudo chown $(PRINT_SPOOLER_UNAME) $(PRINT_SPOOLER_PATH)) &&\
-	sudo chown $(PRINT_SPOOLER_UNAME) $(BIN)/addqueue &&\
-	sudo chown $(PRINT_SPOOLER_UNAME) $(BIN)/rmqueue &&\
-  sudo chown $(PRINT_SPOOLER_UNAME) $(BIN)/showqueue &&\
-	sudo chmod u+s $(BIN)/addqueue &&\
-	sudo chmod u+s $(BIN)/rmqueue &&\
-	sudo chmod u+s $(BIN)/showqueue &&\
-	echo "-------------------------------------------------------"&&\
+	@id -u $(PRINT_SPOOLER_UNAME) >/dev/null 2>&1 ||\
+		sudo useradd $(PRINT_SPOOLER_UNAME)
+	@[ -d $(PRINT_SPOOLER_PATH) ] ||\
+		(umask 0077;\
+		 sudo mkdir $(PRINT_SPOOLER_PATH);\
+		 sudo chown $(PRINT_SPOOLER_UNAME):$(PRINT_SPOOLER_UNAME) $(PRINT_SPOOLER_PATH))
+	@(sudo chown $(PRINT_SPOOLER_UNAME) $(BIN)/addqueue ;\
+		sudo chown $(PRINT_SPOOLER_UNAME) $(BIN)/rmqueue ;\
+  	sudo chown $(PRINT_SPOOLER_UNAME) $(BIN)/showqueue ;\
+		sudo chmod u+s $(BIN)/addqueue ;\
+		sudo chmod u+s $(BIN)/rmqueue ;\
+		sudo chmod u+s $(BIN)/showqueue)
+	@echo "-------------------------------------------------------"&&\
 	echo "Installation Succesful -- unless you saw any errors ;-)"&&\
 	echo "-------------------------------------------------------"
 
 uninstall:
 	@[ -d $(PRINT_SPOOLER_PATH) ] &&\
-		sudo rm -rf $(PRINT_SPOOLER_PATH) &&\
-	id -u $(PRINT_SPOOLER_UNAME) 2>/dev/null 1>/dev/null &&\
-		sudo userdel $(PRINT_SPOOLER_UNAME) &&\
-	echo "--------------------------------------------------------" &&\
+		sudo rm -rf $(PRINT_SPOOLER_PATH)
+	@id -u $(PRINT_SPOOLER_UNAME) >/dev/null 2>&1 &&\
+		sudo userdel $(PRINT_SPOOLER_UNAME)
+	@echo "--------------------------------------------------------" &&\
 	echo "Uninstalling Successful -- unless you saw any errors ;-)" &&\
 	echo "--------------------------------------------------------"
 
