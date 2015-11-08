@@ -49,19 +49,28 @@ static inline int is_not_installed(void)
 int rmqueue(char *filename)
 {
 	int rval;
-	char *bname;
-	char dst[PATH_MAX];
+	char path[PATH_MAX];
+	struct stat sbuf;
 
-	return 0;
+	snprintf(path, PATH_MAX, "%s/%s", PRINT_SPOOLER_PATH, filename);
 
-	bname = basename(filename);
-	rval = snprintf(dst, PATH_MAX, "%s/%s_%d",
-			PRINT_SPOOLER_PATH, bname, ruid);
-	if (rval <= 0) {
-		perror("snprintf");
+	rval = stat(path, &sbuf);
+	if (rval) {
+		perror("stat");
 		goto error;
 	}
-	printf("file \"%s\" copied to \"%s\"\n", filename, dst);
+	if (sbuf.st_gid !=  ruid) {
+		fprintf(stderr,
+			"Error: No permission to remove file \"%s\"\n",
+			filename);
+		goto error;
+	}
+	rval = unlink(path);
+	if (rval) {
+		perror("unlink");
+		goto  error;
+	}
+	printf("Successfully remover file with uid: \"%s\"d\n", filename);
 
 	return 0;
 error:

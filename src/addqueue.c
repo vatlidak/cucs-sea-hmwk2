@@ -104,12 +104,7 @@ int addqueue(char *filename)
 	char dst[PATH_MAX];
 
 	bname = basename(filename);
-	rval = snprintf(dst, PATH_MAX, "%s/%s_%d",
-			PRINT_SPOOLER_PATH, bname, ruid);
-	if (rval <= 0) {
-		perror("snprintf");
-		goto error;
-	}
+	snprintf(dst, PATH_MAX, "%s/%s_%d", PRINT_SPOOLER_PATH, bname, ruid);
 	rval = copy_file(filename, dst);
 	if (rval) {
 		fprintf(stderr, "Failed to copy file \"%s\" to \"%s\"\n",
@@ -121,7 +116,7 @@ int addqueue(char *filename)
 		perror("chown");
 		goto error;
 	}
-	printf("file \"%s\" copied to \"%s\"\n", filename, dst);
+	printf("file \"%s\" copied to \"%s\"\n", filename, PRINT_SPOOLER_PATH);
 
 	return 0;
 error:
