@@ -13,12 +13,17 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <libgen.h>
 #include <errno.h>
 #include <fcntl.h>
 
 #define PRINT_SPOOLER_PATH "/var/print_spooler"
+#define PRINT_SPOOLER_UNAME "print_spooler"
 #define SPOOLER_PERM 0700
 #define FILENAME_LEN 256
+
+
+uid_t euid, ruid;
 
 
 /*
@@ -30,7 +35,7 @@ static inline int is_not_installed(void)
 	struct stat sbuf;
 
 	rval = stat(PRINT_SPOOLER_PATH, &sbuf);
-	if (rval == -1 ) {
+	if (rval == -1) {
 		fprintf(stdout, "print spooler not properly installed\n");
 		return  -1;
 	}
@@ -64,15 +69,14 @@ static int copy_file(const char *src, const char *dst)
 
 	while ((bytes_read = read(fd_src, block, 4096)) > 0) {
 		char *p_out = block;
+
 		bytes_written = 0;
-		
 		do {
 			rval = write(fd_dst, p_out, bytes_read);
-                	if (rval >= 0) {
+			if (rval >= 0) {
 				bytes_written += rval;
-	                	p_out += rval;
-			}
-			else if (errno != EINTR) {
+				p_out += rval;
+			} else if (errno != EINTR) {
 				goto out_error;
 			}
 		} while (bytes_written != bytes_read);
@@ -98,16 +102,41 @@ out_ok:
 int addqueue(char *filename)
 {
 	int rval;
-	char dst[FILENAME_LEN];
+	char *dst, *bname;
+	int filelen;
 
-	rval = snprintf(dst, FILENAME_LEN, "%s/%s", PRINT_SPOOLER_PATH, "la");
+	bname = basename(filename);
+	filelen = strlen(bname) + strlen(PRINT_SPOOLER_PATH) + 1 + 1;
+	dst = calloc(filelen, sizeof(char));
+	if (!dst) {
+		perror("calloc");
+		goto error;
+	}
+	rval = snprintf(dst, filelen, "%s/%s", PRINT_SPOOLER_PATH, bname);
 	if (rval <= 0) {
 		perror("snprintf");
-		return -1;
+		goto error_free;
 	}
-	copy_file(filename, dst);
+	rval = copy_file(filename, dst);
+	if (rval) {
+		fprintf(stderr, "Failed to copy file \"%s\" to \"%s\"\n",
+			filename, dst);
+		goto error_free;
+	}
+	rval = chown(dst, euid, ruid);
+	if (rval) {
+		perror("chown");
+		goto error_free;
+	}
+	printf("file \"%s\" copied to \"%s\"\n", filename, dst);
 
+	free(dst);
 	return 0;
+
+error_free:
+	free(dst);
+error:
+	return -1;
 }
 
 /*
@@ -117,7 +146,6 @@ int main(int argc, char **argv)
 {
 	int rval;
 	int i = 0;
-	uid_t euid, ruid;
 
 	if (argc < 2)
 		goto usage;
@@ -129,14 +157,15 @@ int main(int argc, char **argv)
 	euid = geteuid();
 	rval = setuid(ruid);
 	if (rval) {
-		fprintf(stderr, "Failed to escallate to uid: %d\n", ruid);
+		fprintf(stderr, "Failed to reset to real uid: %d\n", ruid);
 		goto error;
 	}
 
 	while (++i < argc) {
 		rval = setuid(euid);
 		if (rval) {
-			fprintf(stderr, "Failed to escallate to uid: %d\n", ruid);
+			fprintf(stderr, "Failed to escallate to effective uid: %d\n",
+				euid);
 			goto error;
 		}
 		fprintf(stderr, "1)%d %d\n", getuid(), geteuid());
@@ -146,7 +175,8 @@ int main(int argc, char **argv)
 				argv[i]);
 		rval = setuid(ruid);
 		if (rval) {
-			fprintf(stderr, "Failed to escallate to uid: %d\n", ruid);
+			fprintf(stderr, "Failed to reset to real uid: %d\n",
+				ruid);
 			goto error;
 		}
 		fprintf(stderr, "2)%d %d\n", getuid(), geteuid());
