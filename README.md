@@ -14,6 +14,9 @@ COMS W4187 Fall 2015, Columbia University
 * scripts/checkpatch.pl: Format checking script
 * tests/test.txt: A demo set of test commands
 
+## Notes
+* Files and directories are created atomically with the use of umask
+
 ## Installation
 * The installation needs root priviledges to:
   - Create a user "print_spoller"

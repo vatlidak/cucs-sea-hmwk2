@@ -16,11 +16,9 @@
 #include <libgen.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 
 #define PRINT_SPOOLER_PATH "/var/print_spooler"
-#define PRINT_SPOOLER_UNAME "print_spooler"
-#define SPOOLER_PERM 0700
-#define FILENAME_LEN 256
 
 
 uid_t euid, ruid;
@@ -102,39 +100,30 @@ out_ok:
 int addqueue(char *filename)
 {
 	int rval;
-	char *dst, *bname;
-	int filelen;
+	char *bname;
+	char dst[PATH_MAX];
 
 	bname = basename(filename);
-	filelen = strlen(bname) + strlen(PRINT_SPOOLER_PATH) + 1 + 1;
-	dst = calloc(filelen, sizeof(char));
-	if (!dst) {
-		perror("calloc");
-		goto error;
-	}
-	rval = snprintf(dst, filelen, "%s/%s", PRINT_SPOOLER_PATH, bname);
+	rval = snprintf(dst, PATH_MAX, "%s/%s_%d",
+			PRINT_SPOOLER_PATH, bname, ruid);
 	if (rval <= 0) {
 		perror("snprintf");
-		goto error_free;
+		goto error;
 	}
 	rval = copy_file(filename, dst);
 	if (rval) {
 		fprintf(stderr, "Failed to copy file \"%s\" to \"%s\"\n",
 			filename, dst);
-		goto error_free;
+		goto error;
 	}
 	rval = chown(dst, euid, ruid);
 	if (rval) {
 		perror("chown");
-		goto error_free;
+		goto error;
 	}
 	printf("file \"%s\" copied to \"%s\"\n", filename, dst);
 
-	free(dst);
 	return 0;
-
-error_free:
-	free(dst);
 error:
 	return -1;
 }
@@ -164,11 +153,11 @@ int main(int argc, char **argv)
 	while (++i < argc) {
 		rval = setuid(euid);
 		if (rval) {
-			fprintf(stderr, "Failed to escallate to effective uid: %d\n",
+			fprintf(stderr,
+				"Failed to escallate to effective uid: %d\n",
 				euid);
 			goto error;
 		}
-		fprintf(stderr, "1)%d %d\n", getuid(), geteuid());
 		if (addqueue(argv[i]))
 			fprintf(stderr,
 				"Failed to add \"%s\" in the queue\n",
@@ -179,7 +168,6 @@ int main(int argc, char **argv)
 				ruid);
 			goto error;
 		}
-		fprintf(stderr, "2)%d %d\n", getuid(), geteuid());
 	}
 
 	return 0;
