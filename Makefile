@@ -2,7 +2,8 @@ CC := gcc
 CFLAGS := -Wall -Iinclude
 LDFLAGS :=
 
-BIN := bin
+BIN := ./bin
+USR_BIN := /bin
 OBJECTS := addqueue.o rmqueue.o showqueue.o
 EXECUTABLES := $(BIN)/$(OBJECTS:.o=)
 
@@ -45,15 +46,21 @@ install:
 		sudo chmod u+s $(BIN)/addqueue ;\
 		sudo chmod u+s $(BIN)/rmqueue ;\
 		sudo chmod u+s $(BIN)/showqueue)
+	@[ ! -d $(USR_BIN) ] ||\
+		(sudo cp $(BIN)/addqueue $(USR_BIN);\
+		sudo cp $(BIN)/rmqueue $(USR_BIN);\
+		sudo cp $(BIN)/showqueue $(USR_BIN))
 	@echo "-------------------------------------------------------"&&\
 	echo "Installation Succesful -- unless you saw any errors ;-)"&&\
 	echo "-------------------------------------------------------"
 
 uninstall:
-	@[ -d $(PRINT_SPOOLER_PATH) ] &&\
-		sudo rm -rf $(PRINT_SPOOLER_PATH)
-	@id -u $(PRINT_SPOOLER_UNAME) >/dev/null 2>&1 &&\
-		sudo userdel $(PRINT_SPOOLER_UNAME)
+	@([ -d $(PRINT_SPOOLER_PATH) ] && sudo rm -rf $(PRINT_SPOOLER_PATH)) || true
+	@(id -u $(PRINT_SPOOLER_UNAME) >/dev/null 2>&1 &&\
+		sudo userdel $(PRINT_SPOOLER_UNAME) || true)
+	@[ ! -f $(USR_BIN)/addqueue ]  || sudo rm $(USR_BIN)/addqueue
+	@[ ! -f $(USR_BIN)/rmqueue ]   || sudo rm $(USR_BIN)/rmqueue
+	@[ ! -f $(USR_BIN)/showqueue ] || sudo rm $(USR_BIN)/showqueue
 	@echo "--------------------------------------------------------" &&\
 	echo "Uninstalling Successful -- unless you saw any errors ;-)" &&\
 	echo "--------------------------------------------------------"
