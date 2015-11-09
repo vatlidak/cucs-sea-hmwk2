@@ -37,19 +37,26 @@ install:
 	@id -u $(PRINT_SPOOLER_UNAME) >/dev/null 2>&1 ||\
 		sudo useradd $(PRINT_SPOOLER_UNAME)
 	@[ -d $(PRINT_SPOOLER_PATH) ] ||\
-		(umask 0077;\
-		 sudo mkdir $(PRINT_SPOOLER_PATH);\
+		(umask 0077 &&\
+		 sudo mkdir $(PRINT_SPOOLER_PATH) &&\
 		 sudo chown $(PRINT_SPOOLER_UNAME):$(PRINT_SPOOLER_UNAME) $(PRINT_SPOOLER_PATH))
-	@(sudo chown $(PRINT_SPOOLER_UNAME) $(BIN)/addqueue ;\
-		sudo chown $(PRINT_SPOOLER_UNAME) $(BIN)/rmqueue ;\
-  	sudo chown $(PRINT_SPOOLER_UNAME) $(BIN)/showqueue ;\
-		sudo chmod u+s $(BIN)/addqueue ;\
-		sudo chmod u+s $(BIN)/rmqueue ;\
-		sudo chmod u+s $(BIN)/showqueue)
+	@[ ! -d $(BIN) ] ||\
+		(sudo chown $(PRINT_SPOOLER_UNAME):$(ROOT_UNAME) $(BIN)/addqueue &&\
+		 sudo chmod u+s $(BIN)/addqueue &&\
+		 sudo chown $(PRINT_SPOOLER_UNAME):$(ROOT_UNAME) $(BIN)/rmqueue &&\
+		 sudo chmod u+s $(BIN)/rmqueue &&\
+		 sudo chown $(PRINT_SPOOLER_UNAME):$(ROOT_UNAME) $(BIN)/showqueue &&\
+		 sudo chmod u+s $(BIN)/showqueue)
 	@[ ! -d $(USR_BIN) ] ||\
-		(sudo cp $(BIN)/addqueue $(USR_BIN);\
-		sudo cp $(BIN)/rmqueue $(USR_BIN);\
-		sudo cp $(BIN)/showqueue $(USR_BIN))
+		(sudo cp $(BIN)/addqueue $(USR_BIN) &&\
+		 sudo chown $(PRINT_SPOOLER_UNAME):$(ROOT_UNAME) $(USR_BIN)/addqueue &&\
+		 sudo chmod u+s $(USR_BIN)/addqueue &&\
+		 sudo cp $(BIN)/rmqueue $(USR_BIN) &&\
+		 sudo chown $(PRINT_SPOOLER_UNAME):$(ROOT_UNAME) $(USR_BIN)/rmqueue &&\
+		 sudo chmod u+s $(USR_BIN)/rmqueue &&\
+		 sudo cp $(BIN)/showqueue $(USR_BIN) &&\
+		 sudo chown $(PRINT_SPOOLER_UNAME):$(ROOT_UNAME) $(USR_BIN)/showqueue &&\
+		 sudo chmod u+s $(USR_BIN)/showqueue)
 	@echo "-------------------------------------------------------"&&\
 	echo "Installation Succesful -- unless you saw any errors ;-)"&&\
 	echo "-------------------------------------------------------"

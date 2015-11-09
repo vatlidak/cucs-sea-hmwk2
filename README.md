@@ -19,7 +19,6 @@ COMS W4187 Fall 2015, Columbia University
 * Files and directories are created atomically with the use of umask
 * A user cannot add in the queueu a file that already exists - maybe we want to
   change this into a heap -- dump -- format.
-* Fix installation under "/bin" issue
 
 ## Build
 * make [build]

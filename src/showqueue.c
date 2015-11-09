@@ -67,11 +67,11 @@ int showqueue(char *dirname)
 		goto error;
 	}
 	i = 0;
-	printf("print spooler queue:\n");
 	printf("---------------------------------------------------------------------------------\n");
 	printf("nfile\t\ttime added\t\tdate added\t\tuid\n");
 	printf("---------------------------------------------------------------------------------\n");
 	while ((pdirent = readdir(pdir)) != NULL) {
+		++i;
 		if (!strcmp(pdirent->d_name, ".") ||
 		    !strcmp(pdirent->d_name, ".."))
 			continue;
@@ -88,7 +88,6 @@ int showqueue(char *dirname)
 		strftime(strdate, sizeof(strdate), "%F", &lt);
 		printf("%d\t\t%s\t\t%s\t\t%s\n",
 		       (int) sbuf.st_ino, strtime, strdate, pdirent->d_name);
-		++i;
 	}
 	if (!i)
 		goto error;

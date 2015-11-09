@@ -115,7 +115,6 @@ int addqueue(char *filename)
 		perror("chown");
 		goto error;
 	}
-	printf("file \"%s\" copied to \"%s\"\n", filename, PRINT_SPOOLER_PATH);
 
 	return 0;
 error:

@@ -70,7 +70,6 @@ int rmqueue(char *filename)
 		perror("unlink");
 		goto  error;
 	}
-	printf("Successfully remover file with uid: \"%s\"d\n", filename);
 
 	return 0;
 error:
