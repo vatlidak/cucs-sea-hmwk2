@@ -159,7 +159,6 @@ int addqueue(char *filename)
 		perror("chown");
 		goto error;
 	}
-	printf("%s\n", dst);
 	return 0;
 error:
 	return -1;

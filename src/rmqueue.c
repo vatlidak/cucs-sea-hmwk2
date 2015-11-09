@@ -70,7 +70,6 @@ int rmqueue(char *filename)
 		perror("unlink");
 		goto  error;
 	}
-	printf("%s\n", path);
 	return 0;
 error:
 	return -1;
