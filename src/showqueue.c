@@ -82,7 +82,7 @@ int showqueue(char *dirname)
 			perror("stat");
 			goto error;
 		}
-		localtime_r(&mtime, &lt);
+		localtime_r(&sbuf.st_mtime, &lt);
 		memset(strtime, 0, sizeof(strtime));
 		strftime(strtime, sizeof(strtime), "%H:%M:%S", &lt);
 		memset(strdate, 0, sizeof(strdate));
