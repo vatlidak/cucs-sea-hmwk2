@@ -56,7 +56,6 @@ int showqueue(char *dirname)
 	struct stat sbuf;
 	struct dirent *pdirent;
 
-	time_t  mtime;
 	struct tm lt;
 	char strdate[16];
 	char strtime[16];
@@ -69,9 +68,9 @@ int showqueue(char *dirname)
 	}
 	i = 0;
 	printf("print spooler queue:\n");
-	printf("-------------------------------------------------------------------\n");
+	printf("---------------------------------------------------------------------------------\n");
 	printf("nfile\t\ttime added\t\tdate added\t\tuid\n");
-	printf("-------------------------------------------------------------------\n");
+	printf("---------------------------------------------------------------------------------\n");
 	while ((pdirent = readdir(pdir)) != NULL) {
 		if (!strcmp(pdirent->d_name, ".") ||
 		    !strcmp(pdirent->d_name, ".."))
@@ -94,10 +93,10 @@ int showqueue(char *dirname)
 	if (!i)
 		goto error;
 
-	printf("-------------------------------------------------------------------\n");
+	printf("---------------------------------------------------------------------------------\n");
 	return 0;
 error:
-	printf("-------------------------------------------------------------------\n");
+	printf("---------------------------------------------------------------------------------\n");
 	return -1;
 }
 
