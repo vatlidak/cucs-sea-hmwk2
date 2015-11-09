@@ -148,7 +148,6 @@ int addqueue(char *filename)
 	}
 
 	snprintf(dst, PATH_MAX, "%s/%s", PRINT_SPOOLER_PATH, fid);
-	printf("%s\n", dst);
 	rval = copy_file(filename, dst);
 	if (rval) {
 		fprintf(stderr, "Failed to copy file \"%s\" to \"%s\"\n",
@@ -160,7 +159,7 @@ int addqueue(char *filename)
 		perror("chown");
 		goto error;
 	}
-
+	printf("%s\n", dst);
 	return 0;
 error:
 	return -1;
