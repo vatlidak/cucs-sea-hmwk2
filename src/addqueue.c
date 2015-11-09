@@ -13,10 +13,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <libgen.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <ctype.h>
 
 #include "defines.h"
 
@@ -37,6 +37,44 @@ static inline int is_not_installed(void)
 		return  -1;
 	}
 	return 0;
+}
+
+/*
+ * generate_random_string - use /dev/urandom to create a random string
+ *
+ * @dst: the destination to store the string created
+ * @len: the lenght of the random string
+ */
+static inline int generate_random_string(char *dst, int len)
+{
+	int i;
+	int rval;
+	FILE *fp;
+
+	fp = fopen("/dev/urandom", "r");
+	if (!fp) {
+		perror("fopen");
+		goto error;
+	}
+	i = 0;
+	while (i < len - 1) {
+		do {
+			rval = fread(dst + i, 1, 1, fp);
+			if (rval != 1) {
+				perror("fread");
+				goto error_close;
+			}
+		} while (!isalpha(dst[i]) && !isalnum(dst[i]));
+		i++;
+	}
+	dst[len - 1] = '\0';
+	fclose(fp);
+	return 0;
+
+error_close:
+	fclose(fp);
+error:
+	return -1;
 }
 
 /*
@@ -99,11 +137,18 @@ out_ok:
 int addqueue(char *filename)
 {
 	int rval;
-	char *bname;
 	char dst[PATH_MAX];
+	char fid[FILEID_LEN+1];
 
-	bname = basename(filename);
-	snprintf(dst, PATH_MAX, "%s/%s_%d", PRINT_SPOOLER_PATH, bname, ruid);
+	memset(fid, 0, FILEID_LEN+1);
+	rval = generate_random_string(fid, FILEID_LEN+1);
+	if (rval) {
+		fprintf(stderr, "Cannot create random string\n");
+		goto error;
+	}
+
+	snprintf(dst, PATH_MAX, "%s/%s", PRINT_SPOOLER_PATH, fid);
+	printf("%s\n", dst);
 	rval = copy_file(filename, dst);
 	if (rval) {
 		fprintf(stderr, "Failed to copy file \"%s\" to \"%s\"\n",

@@ -50,6 +50,7 @@ int showqueue(char *dirname)
 {
 	int i;
 	int rval;
+	int nfile;
 	char path[PATH_MAX];
 
 	DIR *pdir;
@@ -67,8 +68,9 @@ int showqueue(char *dirname)
 		goto error;
 	}
 	i = 0;
+	nfile = 0;
 	printf("---------------------------------------------------------------------------------\n");
-	printf("nfile\t\ttime added\t\tdate added\t\tuid\n");
+	printf("nfile\t\ttime added\t\tdate added\t\tfile id\n");
 	printf("---------------------------------------------------------------------------------\n");
 	while ((pdirent = readdir(pdir)) != NULL) {
 		++i;
@@ -87,7 +89,7 @@ int showqueue(char *dirname)
 		memset(strdate, 0, sizeof(strdate));
 		strftime(strdate, sizeof(strdate), "%F", &lt);
 		printf("%d\t\t%s\t\t%s\t\t%s\n",
-		       (int) sbuf.st_ino, strtime, strdate, pdirent->d_name);
+		       ++nfile, strtime, strdate, pdirent->d_name);
 	}
 	if (!i)
 		goto error;

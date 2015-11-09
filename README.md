@@ -15,10 +15,8 @@ COMS W4187 Fall 2015, Columbia University
 * tests: contain some test media files
 
 ## Notes
-* To avoid conflicts for same file names of different users, we append real uid
-* Files and directories are created atomically with the use of umask
-* A user cannot add in the queueu a file that already exists - maybe we want to
-  change this into a heap -- dump -- format.
+* Each file added in the queue is named after a 16-bytes unique
+  file identifier randomly created from /dev/urandom.
 
 ## Build
 * make [build]
