@@ -18,7 +18,7 @@
 #include <fcntl.h>
 #include <limits.h>
 
-#define PRINT_SPOOLER_PATH "/var/print_spooler"
+#include "defines.h"
 
 
 uid_t euid, ruid;

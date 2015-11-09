@@ -18,8 +18,7 @@
 #include <fcntl.h>
 #include <limits.h>
 
-#define PRINT_SPOOLER_PATH "/var/print_spooler"
-
+#include "defines.h"
 
 uid_t euid, ruid;
 
@@ -56,12 +55,12 @@ static int copy_file(const char *src, const char *dst)
 
 	fd_src = open(src, O_RDONLY);
 	if (fd_src == -1) {
-		perror("open(src)");
+		perror("open (src)");
 		return -1;
 	}
 	fd_dst = open(dst, O_WRONLY | O_CREAT | O_EXCL, 0700);
 	if (fd_dst == -1) {
-		perror("open(dst)");
+		perror("open (dst)");
 		return -1;
 	}
 
