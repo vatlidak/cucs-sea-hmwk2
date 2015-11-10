@@ -1,6 +1,7 @@
 CC := gcc
 CFLAGS := -Wall -Iinclude
 LDFLAGS :=
+ARGS :=
 
 OBJECTS := addqueue.o rmqueue.o showqueue.o
 EXECUTABLES := $(BIN)/$(OBJECTS:.o=)
@@ -35,7 +36,7 @@ showqueue: $(OBJECTS)
 %.o: src/%.c
 	@$(CC) $(CFLAGS) -c $^
 
-install:
+install: build
 	@id -u $(PRINT_SPOOLER_UNAME) >/dev/null 2>&1 ||\
 		sudo useradd $(PRINT_SPOOLER_UNAME)
 	@[ -d $(PRINT_SPOOLER_PATH) ] ||\
@@ -74,11 +75,28 @@ uninstall:
 	echo "Uninstalling Successful -- unless you saw any errors ;-)" &&\
 	echo "--------------------------------------------------------"
 
-test: build install
+test: 
 	addqueue $(TEST)/*
 	showqueue
 	addqueue $(TEST)/*
 	showqueue
+
+exec_addqueue:
+ifeq ($(ARGS),)
+	@echo "Usage: make ARGS=filename1...filenameN"
+else
+	@addqueue $(ARGS) 2>/dev/null
+endif
+
+exec_rmqueue:
+ifeq ($(ARGS),)
+	@echo "Usage: make ARGS=filename1...filenameN"
+else
+	@rmqueue $(ARGS) 2>/dev/null
+endif
+
+exec_showqueue:
+	@showqueue $(ARGS) 2>/dev/null
 
 checkpatch:
 	scripts/checkpatch.pl --no-tree -f src/*
