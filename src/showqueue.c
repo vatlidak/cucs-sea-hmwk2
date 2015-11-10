@@ -69,9 +69,9 @@ int showqueue(char *dirname)
 	}
 	i = 0;
 	nfile = 0;
-	printf("--------------------------------------------------------------------------------------\n");
-	printf("nfile\t\ttime added\t\tdate added\t\tfile id (_uid)\n");
-	printf("--------------------------------------------------------------------------------------\n");
+	printf("--------------------------------------------------------\n");
+	printf("nfile\tuid\tdate-time\t\tfile id\n");
+	printf("--------------------------------------------------------\n");
 	while ((pdirent = readdir(pdir)) != NULL) {
 		++i;
 		if (!strcmp(pdirent->d_name, ".") ||
@@ -88,16 +88,16 @@ int showqueue(char *dirname)
 		strftime(strtime, sizeof(strtime), "%H:%M:%S", &lt);
 		memset(strdate, 0, sizeof(strdate));
 		strftime(strdate, sizeof(strdate), "%F", &lt);
-		printf("%d\t\t%s\t\t%s\t\t%s_%d\n",
-		       ++nfile, strtime, strdate, pdirent->d_name, sbuf.st_gid);
+		printf("%d\t%d\t%s-%s\t%s\n",
+		       ++nfile, sbuf.st_gid, strdate, strtime, pdirent->d_name);
 	}
 	if (!i)
 		goto error;
 
-	printf("--------------------------------------------------------------------------------------\n");
+	printf("--------------------------------------------------------\n");
 	return 0;
 error:
-	printf("--------------------------------------------------------------------------------------\n");
+	printf("--------------------------------------------------------\n");
 	return -1;
 }
 

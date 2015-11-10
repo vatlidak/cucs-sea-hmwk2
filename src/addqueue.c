@@ -143,22 +143,22 @@ int addqueue(char *filename)
 	memset(fid, 0, FILEID_LEN+1);
 	rval = generate_random_string(fid, FILEID_LEN+1);
 	if (rval) {
-		fprintf(stderr, "Cannot create random string\n");
+		printf("%s: X Failed to generate random fid\n", filename);
 		goto error;
 	}
 
 	snprintf(dst, PATH_MAX, "%s/%s", PRINT_SPOOLER_PATH, fid);
 	rval = copy_file(filename, dst);
 	if (rval) {
-		fprintf(stderr, "Failed to copy file \"%s\" to \"%s\"\n",
-			filename, dst);
+		printf("%s: X Failed to copy file\n", filename);
 		goto error;
 	}
 	rval = chown(dst, euid, ruid);
 	if (rval) {
-		perror("chown");
+		printf("%s: X Failed chown of file\n", filename);
 		goto error;
 	}
+	printf("%s: Y %s\n", filename, fid);
 	return 0;
 error:
 	return -1;

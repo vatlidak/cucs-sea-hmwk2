@@ -2,8 +2,8 @@ VM_ADDRESS:sec-vmXX.cs.columbia.edu
 USER_SUDO:tinyvm
 PASS_SUDO:12345678
 
-USER_SPOOLER:
-PASS_SPOOLER:
+USER_SPOOLER:print_spooler
+PASS_SPOOLER:(not set)
 
 USER:user01
 PASS:12345678

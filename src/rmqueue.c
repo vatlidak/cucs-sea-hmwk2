@@ -56,20 +56,19 @@ int rmqueue(char *filename)
 
 	rval = stat(path, &sbuf);
 	if (rval) {
-		perror("stat");
+		printf("%s: X stat error\n", filename);
 		goto error;
 	}
 	if (sbuf.st_gid !=  ruid) {
-		fprintf(stderr,
-			"Error: No permission to remove file \"%s\"\n",
-			filename);
+		printf("%s: X permission error\n", filename);
 		goto error;
 	}
 	rval = unlink(path);
 	if (rval) {
-		perror("unlink");
+		printf("%s: X unlink error\n", filename);
 		goto  error;
 	}
+	printf("%s: Y\n", filename);
 	return 0;
 error:
 	return -1;
