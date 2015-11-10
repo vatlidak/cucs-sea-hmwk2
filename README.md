@@ -18,6 +18,11 @@ COMS W4187 Fall 2015, Columbia University
 * Each file added in the queue is named after a 16-bytes unique
   file identifier randomly created from /dev/urandom.
 
+## Errors
+* Please supress stderr before running scripts to automatic parsing
+  of output messages, since standard error is utilized for some error
+  messages
+
 ## Build
 * make [build]
 

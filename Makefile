@@ -72,15 +72,6 @@ uninstall:
 	echo "Uninstalling Successful -- unless you saw any errors ;-)" &&\
 	echo "--------------------------------------------------------"
 
-#test: clean build
-#	cat $(TEST) | $(EXECUTABLE) 2>/dev/null
-#
-#exec: clean build
-#	$(EXECUTABLE) 2>/dev/null
-#
-#valgrid: clean build
-#	/usr/bin/valgrind -v --input-fd=3 < $(TEST) $(EXECUTABLE)
-
 checkpatch:
 	scripts/checkpatch.pl --no-tree -f src/*
 
