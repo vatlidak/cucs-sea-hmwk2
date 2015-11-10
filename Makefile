@@ -2,10 +2,12 @@ CC := gcc
 CFLAGS := -Wall -Iinclude
 LDFLAGS :=
 
-BIN := ./bin
-USR_BIN := /bin
 OBJECTS := addqueue.o rmqueue.o showqueue.o
 EXECUTABLES := $(BIN)/$(OBJECTS:.o=)
+
+BIN := ./bin
+TEST := ./tests
+USR_BIN := /bin
 
 ROOT_UNAME := "root"
 PRINT_SPOOLER_PATH := "/var/print_spooler"
@@ -71,6 +73,12 @@ uninstall:
 	@echo "--------------------------------------------------------" &&\
 	echo "Uninstalling Successful -- unless you saw any errors ;-)" &&\
 	echo "--------------------------------------------------------"
+
+test: build install
+	addqueue $(TEST)/*
+	showqueue
+	addqueue $(TEST)/*
+	showqueue
 
 checkpatch:
 	scripts/checkpatch.pl --no-tree -f src/*
