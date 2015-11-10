@@ -41,6 +41,33 @@ static inline int is_not_installed(void)
 }
 
 /*
+ * sortbydatetime - helper for scandir sorting
+ */
+static inline int
+sortbydatetime(const struct dirent **a, const struct dirent **b)
+{
+	int rval;
+	struct stat sbuf1, sbuf2;
+	char path1[PATH_MAX], path2[PATH_MAX];
+
+	snprintf(path1, PATH_MAX, "%s/%s", PRINT_SPOOLER_PATH, (*a)->d_name);
+	snprintf(path2, PATH_MAX, "%s/%s", PRINT_SPOOLER_PATH, (*b)->d_name);
+
+	rval = stat(path1, &sbuf1);
+	if (rval) {
+		perror("stat");
+		return 0;
+	}
+	rval = stat(path2, &sbuf2);
+	if (rval) {
+		perror("stat");
+		return 0;
+	}
+
+	return sbuf1.st_mtime < sbuf2.st_mtime;
+}
+
+/*
  * showqueue - implements showqueue command
  * @dirame: print spooler directory
  *
@@ -48,14 +75,14 @@ static inline int is_not_installed(void)
  */
 int showqueue(char *dirname)
 {
-	int i;
+	int n;
 	int rval;
 	int nfile;
 	char path[PATH_MAX];
 
 	DIR *pdir;
 	struct stat sbuf;
-	struct dirent *pdirent;
+	struct dirent **pdirent;
 
 	struct tm lt;
 	char strdate[16];
@@ -67,21 +94,25 @@ int showqueue(char *dirname)
 		perror("opendir");
 		goto error;
 	}
-	i = 0;
 	nfile = 0;
 	printf("--------------------------------------------------------\n");
 	printf("nfile\tuid\tdate-time\t\tfile id\n");
 	printf("--------------------------------------------------------\n");
-	while ((pdirent = readdir(pdir)) != NULL) {
-		++i;
-		if (!strcmp(pdirent->d_name, ".") ||
-		    !strcmp(pdirent->d_name, ".."))
-			continue;
-		snprintf(path, PATH_MAX, "%s/%s", dirname, pdirent->d_name);
+
+	n = scandir(dirname, &pdirent, NULL, sortbydatetime);
+	if (n == -1) {
+		perror("scandir");
+		goto error;
+	}
+	while (n--) {
+		if (!strcmp(pdirent[n]->d_name, ".") ||
+		    !strcmp(pdirent[n]->d_name, ".."))
+			goto free_and_continue;
+		snprintf(path, PATH_MAX, "%s/%s", dirname, pdirent[n]->d_name);
 		rval = stat(path, &sbuf);
 		if (rval) {
 			perror("stat");
-			goto error;
+			goto free_and_continue;
 		}
 		localtime_r(&sbuf.st_mtime, &lt);
 		memset(strtime, 0, sizeof(strtime));
@@ -89,11 +120,11 @@ int showqueue(char *dirname)
 		memset(strdate, 0, sizeof(strdate));
 		strftime(strdate, sizeof(strdate), "%F", &lt);
 		printf("%d\t%d\t%s-%s\t%s\n",
-		       ++nfile, sbuf.st_gid, strdate, strtime, pdirent->d_name);
+		       ++nfile, sbuf.st_gid, strdate, strtime, pdirent[n]->d_name);
+free_and_continue:
+		free(pdirent[n]);
 	}
-	if (!i)
-		goto error;
-
+	free(pdirent);
 	printf("--------------------------------------------------------\n");
 	return 0;
 error:
