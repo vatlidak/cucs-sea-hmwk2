@@ -18,27 +18,10 @@
 #include <fcntl.h>
 #include <limits.h>
 
-#include "defines.h"
+#include "spooler.h"
 
 
 uid_t euid, ruid;
-
-
-/*
- * initqueue - asserts proper installation of print spooler
- */
-static inline int is_not_installed(void)
-{
-	int rval;
-	struct stat sbuf;
-
-	rval = stat(PRINT_SPOOLER_PATH, &sbuf);
-	if (rval == -1) {
-		fprintf(stdout, "print spooler not properly installed\n");
-		return  -1;
-	}
-	return 0;
-}
 
 /*
  * addqueue - implements addqueue command
