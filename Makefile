@@ -11,7 +11,7 @@ TEST := ./tests
 USR_BIN := /bin
 
 ROOT_UNAME := "root"
-PRINT_SPOOLER_PATH := "/var/print_spooler"
+PRINT_SPOOLER_PATH := "/var/spool/print"
 PRINT_SPOOLER_UNAME := "print_spooler"
 
 .PHONY: build addqueue rmqueue showqueue install clean
